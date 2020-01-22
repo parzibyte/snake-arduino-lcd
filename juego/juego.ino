@@ -19,8 +19,19 @@
 #define ANCHURA_LCD 16
 #define ALTURA_LCD 2
 #define DIRECCION_LCD 0x3F // Si no sabes la dirección, visita https://parzibyte.me/blog/2018/02/02/obtener-direccion-modulo-i2c-lcd-arduino/
+#define ALTURA_TABLERO 16
+#define ANCHURA_TABLERO 20
+#define MAXIMA_LONGITUD_SERPIENTE (ALTURA_TABLERO * ANCHURA_TABLERO)
+
+
+#define DIRECCION_DERECHA 0
+#define DIRECCION_IZQUIERDA 1
+#define DIRECCION_ARRIBA 2
+#define DIRECCION_ABAJO 3
+
+
 LiquidCrystal_I2C pantalla(DIRECCION_LCD, ANCHURA_LCD, ALTURA_LCD);
-int prueba[16][20] = {
+int prueba[ALTURA_TABLERO][ANCHURA_TABLERO] = {
   {0, 0, 0, 0, 0,/*  */0, 0, 0, 0, 0, /*  */0, 0, 0, 0, 0,/*  */0, 0, 0, 0, 0,},
   {0, 0, 0, 0, 0,/*  */0, 0, 0, 0, 0, /*  */0, 0, 0, 0, 0,/*  */0, 0, 0, 0, 0,},
   {0, 0, 0, 0, 0,/*  */0, 0, 0, 0, 0, /*  */0, 0, 0, 0, 0,/*  */0, 0, 0, 0, 0,},
@@ -52,18 +63,21 @@ class PedazoSerpiente {
     PedazoSerpiente() {
     }
 };
-const int MAXIMA_LONGITUD_SERPIENTE = 16 * 20;
 
-#define DIRECCION_DERECHA 0
-#define DIRECCION_IZQUIERDA 1
-#define DIRECCION_ARRIBA 2
-#define DIRECCION_ABAJO 3
 
 PedazoSerpiente serpiente[MAXIMA_LONGITUD_SERPIENTE];
 int longitudSerpiente = 0;
 int direccion = DIRECCION_DERECHA;
 
 void cambiarDireccion(int nuevaDireccion) {
+  if (
+    nuevaDireccion != DIRECCION_DERECHA
+    && nuevaDireccion != DIRECCION_IZQUIERDA
+    && nuevaDireccion != DIRECCION_ARRIBA
+    && nuevaDireccion != DIRECCION_ABAJO
+  ) {
+    return;
+  }
   if (
     (nuevaDireccion == DIRECCION_DERECHA || nuevaDireccion == DIRECCION_IZQUIERDA)
     && (direccion == DIRECCION_DERECHA || direccion == DIRECCION_IZQUIERDA)
@@ -79,6 +93,8 @@ void cambiarDireccion(int nuevaDireccion) {
 
 void agregarPedazo(int x, int y) {
   if (longitudSerpiente >= MAXIMA_LONGITUD_SERPIENTE) return;
+  if (x + 1 >= ANCHURA_TABLERO || x < 0)return;
+  if (y + 1 >= ALTURA_TABLERO || y < 0)return;
   serpiente[longitudSerpiente] = PedazoSerpiente(x, y);
   longitudSerpiente++;
 }
@@ -90,16 +106,20 @@ void moverSerpiente() {
   }
   switch (direccion) {
     case DIRECCION_DERECHA:
-      serpiente[0].x++;
+      if (serpiente[0].x + 1 >= ANCHURA_TABLERO)serpiente[0].x = 0;
+      else serpiente[0].x++;
       break;
     case DIRECCION_IZQUIERDA:
-      serpiente[0].x--;
+      if (serpiente[0].x <= 0)serpiente[0].x = ANCHURA_TABLERO - 1;
+      else serpiente[0].x--;
       break;
     case DIRECCION_ARRIBA:
-      serpiente[0].y--;
+      if (serpiente[0].y <= 0)serpiente[0].y = ALTURA_TABLERO - 1;
+      else serpiente[0].y--;
       break;
     case DIRECCION_ABAJO:
-      serpiente[0].y++;
+      if (serpiente[0].y + 1 >= ALTURA_TABLERO)serpiente[0].y = 0;
+      else serpiente[0].y++;
       break;
   }
 }
@@ -116,11 +136,9 @@ void setup() {
   randomSeed(analogRead(0));
   pantalla.init();
   pantalla.backlight();
-
-  agregarPedazo(5, 10);
-  agregarPedazo(5, 11);
-  agregarPedazo(5, 12);
-  agregarPedazo(5, 13);
+  for (int i = 0; i < 20; i++) {
+    agregarPedazo(5, i);
+  }
 
 
 
@@ -178,7 +196,7 @@ void limpiarMatriz() {
 void loop() {
   //pantalla.noBlink();
   limpiarMatriz();
-  cambiarDireccion(random(0, 4));
+  cambiarDireccion(random(0, 15));
   moverSerpiente();
   colocarSerpienteEnMatriz();
   dibujarMatriz();
