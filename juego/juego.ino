@@ -55,14 +55,29 @@ class PedazoSerpiente {
 };
 const int MAXIMA_LONGITUD_SERPIENTE = 16 * 20;
 
+#define DIRECCION_DERECHA 0
+
 PedazoSerpiente serpiente[MAXIMA_LONGITUD_SERPIENTE];
 int longitudSerpiente = 0;
+int direccion = DIRECCION_DERECHA;
 
 
 void agregarPedazo(int x, int y) {
   if (longitudSerpiente >= MAXIMA_LONGITUD_SERPIENTE) return;
   serpiente[longitudSerpiente] = PedazoSerpiente(x, y);
   longitudSerpiente++;
+}
+
+void moverSerpiente() {
+  for (int i = longitudSerpiente - 1; i >= 1; i--) {
+    serpiente[i].x = serpiente[i - 1].x;
+    serpiente[i].y = serpiente[i - 1].y;
+  }
+  switch (direccion) {
+    case DIRECCION_DERECHA:
+      serpiente[0].x++;
+      break;
+  }
 }
 
 void colocarSerpienteEnMatriz() {
@@ -77,13 +92,12 @@ void setup() {
   pantalla.init();
   pantalla.backlight();
 
-  for (int i = 0; i < 20; i++) {
-    agregarPedazo(5, i);
-    colocarSerpienteEnMatriz();
-    dibujarMatriz();
-    dibujarPuntaje();
-    delay(100);
-  }
+  agregarPedazo(5, 0);
+  agregarPedazo(5, 1);
+  agregarPedazo(5, 2);
+  agregarPedazo(5, 3);
+
+
 
 
 }
@@ -127,8 +141,23 @@ void dibujarMatriz() {
 
 }
 
+void limpiarMatriz() {
+
+  for (int y = 0; y < 16; y++) {
+    for (int x = 0; x < 20; x++) {
+      prueba[y][x] = 0;
+    }
+  }
+}
+
 void loop() {
-
-
+  //pantalla.noBlink();
+  limpiarMatriz();
+  moverSerpiente();
+  colocarSerpienteEnMatriz();
+  dibujarMatriz();
+  dibujarPuntaje();
+//  pantalla.blink();
+  delay(200);
 
 }
