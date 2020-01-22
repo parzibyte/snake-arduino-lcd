@@ -64,17 +64,17 @@ int longitudSerpiente = 0;
 int direccion = DIRECCION_DERECHA;
 
 void cambiarDireccion(int nuevaDireccion) {
-  if(
+  if (
     (nuevaDireccion == DIRECCION_DERECHA || nuevaDireccion == DIRECCION_IZQUIERDA)
-    && (direccion==DIRECCION_DERECHA || direccion==DIRECCION_IZQUIERDA)
-    ) return;
-    
-  if(
-    (nuevaDireccion == DIRECCION_ARRIBA || nuevaDireccion == DIRECCION_ABAJO)
-    && (direccion==DIRECCION_ARRIBA || direccion==DIRECCION_ABAJO)
-    ) return;
+    && (direccion == DIRECCION_DERECHA || direccion == DIRECCION_IZQUIERDA)
+  ) return;
 
-    direccion=nuevaDireccion;
+  if (
+    (nuevaDireccion == DIRECCION_ARRIBA || nuevaDireccion == DIRECCION_ABAJO)
+    && (direccion == DIRECCION_ARRIBA || direccion == DIRECCION_ABAJO)
+  ) return;
+
+  direccion = nuevaDireccion;
 }
 
 void agregarPedazo(int x, int y) {
@@ -178,7 +178,7 @@ void limpiarMatriz() {
 void loop() {
   //pantalla.noBlink();
   limpiarMatriz();
-  cambiarDireccion(random(0,4));
+  cambiarDireccion(random(0, 4));
   moverSerpiente();
   colocarSerpienteEnMatriz();
   dibujarMatriz();
