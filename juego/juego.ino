@@ -16,7 +16,6 @@
     Contacto:   https://parzibyte.me/blog/contacto/
 */
 #include <LiquidCrystal_I2C.h>
-
 #define ANCHURA_LCD 16
 #define ALTURA_LCD 2
 #define DIRECCION_LCD 0x3F // Si no sabes la dirección, visita https://parzibyte.me/blog/2018/02/02/obtener-direccion-modulo-i2c-lcd-arduino/
@@ -56,11 +55,27 @@ class PedazoSerpiente {
 const int MAXIMA_LONGITUD_SERPIENTE = 16 * 20;
 
 #define DIRECCION_DERECHA 0
+#define DIRECCION_IZQUIERDA 1
+#define DIRECCION_ARRIBA 2
+#define DIRECCION_ABAJO 3
 
 PedazoSerpiente serpiente[MAXIMA_LONGITUD_SERPIENTE];
 int longitudSerpiente = 0;
 int direccion = DIRECCION_DERECHA;
 
+void cambiarDireccion(int nuevaDireccion) {
+  if(
+    (nuevaDireccion == DIRECCION_DERECHA || nuevaDireccion == DIRECCION_IZQUIERDA)
+    && (direccion==DIRECCION_DERECHA || direccion==DIRECCION_IZQUIERDA)
+    ) return;
+    
+  if(
+    (nuevaDireccion == DIRECCION_ARRIBA || nuevaDireccion == DIRECCION_ABAJO)
+    && (direccion==DIRECCION_ARRIBA || direccion==DIRECCION_ABAJO)
+    ) return;
+
+    direccion=nuevaDireccion;
+}
 
 void agregarPedazo(int x, int y) {
   if (longitudSerpiente >= MAXIMA_LONGITUD_SERPIENTE) return;
@@ -77,25 +92,35 @@ void moverSerpiente() {
     case DIRECCION_DERECHA:
       serpiente[0].x++;
       break;
+    case DIRECCION_IZQUIERDA:
+      serpiente[0].x--;
+      break;
+    case DIRECCION_ARRIBA:
+      serpiente[0].y--;
+      break;
+    case DIRECCION_ABAJO:
+      serpiente[0].y++;
+      break;
   }
 }
 
 void colocarSerpienteEnMatriz() {
   for (int i = 0; i < longitudSerpiente; i++) {
-    int x = serpiente[i].x,
-        y = serpiente[i].y;
+    int x = serpiente[i].y,
+        y = serpiente[i].x;
     prueba[x][y] = 1;
   }
 }
 
 void setup() {
+  randomSeed(analogRead(0));
   pantalla.init();
   pantalla.backlight();
 
-  agregarPedazo(5, 0);
-  agregarPedazo(5, 1);
-  agregarPedazo(5, 2);
-  agregarPedazo(5, 3);
+  agregarPedazo(5, 10);
+  agregarPedazo(5, 11);
+  agregarPedazo(5, 12);
+  agregarPedazo(5, 13);
 
 
 
@@ -153,11 +178,12 @@ void limpiarMatriz() {
 void loop() {
   //pantalla.noBlink();
   limpiarMatriz();
+  cambiarDireccion(random(0,4));
   moverSerpiente();
   colocarSerpienteEnMatriz();
   dibujarMatriz();
   dibujarPuntaje();
-//  pantalla.blink();
-  delay(200);
+  //  pantalla.blink();
+  delay(50);
 
 }
