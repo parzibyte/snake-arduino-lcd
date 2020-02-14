@@ -79,16 +79,16 @@ int obtenerDireccion() {
 
   int valorX = analogRead(pinX),
       valorY = analogRead(pinY);
-  if (valorX > 900) {
-    return DIRECCION_IZQUIERDA;
-  } else if (valorX < 400) {
-    return DIRECCION_DERECHA;
+  if (valorX > 1000) {
+    return DIRECCION_ARRIBA;
+  } else if (valorX < 200) {
+    return DIRECCION_ABAJO;
   }
 
-  if (valorY > 900) {
-    return DIRECCION_ARRIBA;
-  } else if (valorY < 400) {
-    return DIRECCION_ABAJO;
+  if (valorY > 1000) {
+    return DIRECCION_DERECHA;
+  } else if (valorY < 200) {
+    return DIRECCION_IZQUIERDA;
   }
   return -1;
 }
@@ -189,7 +189,6 @@ void dibujarPuntaje() {
 }
 
 void dibujarMatriz() {
-  pantalla.clear();
   byte figura[8];
   int numeroFigura = 0;
   for (int cuadritoX = 0; cuadritoX < 4; cuadritoX++) {
@@ -247,6 +246,6 @@ void loop() {
   }
 
   dibujarPuntaje();
-  delay(100);
+  delay(10);
 
 }
