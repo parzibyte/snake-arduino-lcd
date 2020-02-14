@@ -1,6 +1,7 @@
 /*
 
     Programado por Luis Cabrera Benito
+    14 de febrero de 2020
    ____          _____               _ _           _
   |  _ \        |  __ \             (_) |         | |
   | |_) |_   _  | |__) |_ _ _ __ _____| |__  _   _| |_ ___
@@ -29,12 +30,13 @@
 #define DIRECCION_ARRIBA 2
 #define DIRECCION_ABAJO 3
 
+// Para leer el Joystick
 const int pinX = 0,
           pinY = 1;
 
 
 LiquidCrystal_I2C pantalla(DIRECCION_LCD, ANCHURA_LCD, ALTURA_LCD);
-int prueba[ALTURA_TABLERO][ANCHURA_TABLERO] = {
+int escenario[ALTURA_TABLERO][ANCHURA_TABLERO] = {
   {0, 0, 0, 0, 0,/*  */0, 0, 0, 0, 0, /*  */0, 0, 0, 0, 0,/*  */0, 0, 0, 0, 0,},
   {0, 0, 0, 0, 0,/*  */0, 0, 0, 0, 0, /*  */0, 0, 0, 0, 0,/*  */0, 0, 0, 0, 0,},
   {0, 0, 0, 0, 0,/*  */0, 0, 0, 0, 0, /*  */0, 0, 0, 0, 0,/*  */0, 0, 0, 0, 0,},
@@ -71,10 +73,13 @@ class PedazoSerpiente {
 PedazoSerpiente serpiente[MAXIMA_LONGITUD_SERPIENTE];
 int longitudSerpiente = 0;
 int direccion = DIRECCION_DERECHA;
-
+// Saber en dónde está la comida para, más tarde, saber si la serpiente colisiona
 int comidaX, comidaY;
+// El puntaje. Se desborda cuando llega a 32767, creo
 int puntaje = 0;
 
+
+// Leer del joystick
 int obtenerDireccion() {
 
   int valorX = analogRead(pinX),
@@ -90,6 +95,8 @@ int obtenerDireccion() {
   } else if (valorY < 200) {
     return DIRECCION_IZQUIERDA;
   }
+  // Regresamos algo inválido, pues no se cambió,
+  // y dependemos de la función cambiarDireccion
   return -1;
 }
 
@@ -152,25 +159,24 @@ void colocarSerpienteEnMatriz() {
   for (int i = 0; i < longitudSerpiente; i++) {
     int x = serpiente[i].y,
         y = serpiente[i].x;
-    prueba[x][y] = 1;
+    escenario[x][y] = 1;
   }
 }
 
+// Calcula coordenadas aleatorias para colocar la comida
 void randomizarComida() {
-
   comidaX = random(0, ANCHURA_TABLERO);
   comidaY = random(0, ALTURA_TABLERO);
 }
-
+// Coloca la comid en el escenrio
 void acomodarComida() {
-  prueba[comidaY][comidaX] = 1;
+  escenario[comidaY][comidaX] = 1;
 }
 
 
 
 void setup() {
   randomSeed(analogRead(0));
-  Serial.begin(9600);
   pantalla.init();
   pantalla.backlight();
   for (int i = 0; i < 3; i++) {
@@ -179,6 +185,12 @@ void setup() {
 
   randomizarComida();
 
+  pantalla.setCursor(0, 0);
+  pantalla.print("Snake");
+  pantalla.setCursor(0, 1);
+  pantalla.print("By Parzibyte");
+  delay(700);
+  pantalla.clear();
 }
 
 void dibujarPuntaje() {
@@ -198,13 +210,17 @@ void dibujarMatriz() {
         int indice = cuadritoY == 0 ? x : (x + 8);
         int inicio = cuadritoX * 5;
         // Quién te conoce math.pow
-        if (prueba[indice][inicio + 0] == 1)numero += 16;
-        if (prueba[indice][inicio + 1] == 1)numero += 8;
-        if (prueba[indice][inicio + 2] == 1)numero += 4;
-        if (prueba[indice][inicio + 3] == 1)numero += 2;
-        if (prueba[indice][inicio + 4] == 1)numero += 1;
+        if (escenario[indice][inicio + 0] == 1)
+          numero += 16;
+        if (escenario[indice][inicio + 1] == 1)
+          numero += 8;
+        if (escenario[indice][inicio + 2] == 1)
+          numero += 4;
+        if (escenario[indice][inicio + 3] == 1)
+          numero += 2;
+        if (escenario[indice][inicio + 4] == 1)
+          numero += 1;
 
-        ///
         figura[x] = numero;
       }
 
@@ -223,7 +239,7 @@ void limpiarMatriz() {
 
   for (int y = 0; y < 16; y++) {
     for (int x = 0; x < 20; x++) {
-      prueba[y][x] = 0;
+      escenario[y][x] = 0;
     }
   }
 }
@@ -242,10 +258,9 @@ void loop() {
   if (colisionaConComida()) {
     puntaje++;
     randomizarComida();
-    agregarPedazo(0, 0);
+    agregarPedazo(0, 0);// De hecho la posición del pedazo no importa al momento de agregar
   }
 
   dibujarPuntaje();
-  delay(10);
-
+  delay(10);// Mientras menor sea, más rápido va la serpiente, pero menor sensibilidad tiene el joystick
 }
