@@ -72,6 +72,9 @@ PedazoSerpiente serpiente[MAXIMA_LONGITUD_SERPIENTE];
 int longitudSerpiente = 0;
 int direccion = DIRECCION_DERECHA;
 
+int comidaX, comidaY;
+int puntaje = 0;
+
 int obtenerDireccion() {
 
   int valorX = analogRead(pinX),
@@ -153,23 +156,28 @@ void colocarSerpienteEnMatriz() {
   }
 }
 
+void randomizarComida() {
+
+  comidaX = random(0, ANCHURA_TABLERO);
+  comidaY = random(0, ALTURA_TABLERO);
+}
+
+void acomodarComida() {
+  prueba[comidaY][comidaX] = 1;
+}
+
+
+
 void setup() {
-  pinMode(2, INPUT_PULLUP);
-  pinMode(3, INPUT_PULLUP);
-  pinMode(4, INPUT_PULLUP);
-  pinMode(13, OUTPUT);
+  randomSeed(analogRead(0));
   Serial.begin(9600);
-
-
-  //randomSeed(analogRead(0));
   pantalla.init();
   pantalla.backlight();
-  for (int i = 0; i < 20; i++) {
+  for (int i = 0; i < 3; i++) {
     agregarPedazo(5, i);
   }
 
-
-
+  randomizarComida();
 
 }
 
@@ -177,7 +185,7 @@ void dibujarPuntaje() {
   pantalla.setCursor(6, 0);
   pantalla.print("SCORE");
   pantalla.setCursor(6, 1);
-  pantalla.print("666");
+  pantalla.print(puntaje);
 }
 
 void dibujarMatriz() {
@@ -221,12 +229,23 @@ void limpiarMatriz() {
   }
 }
 
+bool colisionaConComida() {
+  return serpiente[0].x == comidaX && serpiente[0].y == comidaY;
+}
+
 void loop() {
   limpiarMatriz();
   cambiarDireccion(obtenerDireccion());
   moverSerpiente();
   colocarSerpienteEnMatriz();
+  acomodarComida();
   dibujarMatriz();
+  if (colisionaConComida()) {
+    puntaje++;
+    randomizarComida();
+    agregarPedazo(0, 0);
+  }
+
   dibujarPuntaje();
   delay(100);
 
