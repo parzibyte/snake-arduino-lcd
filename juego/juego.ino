@@ -29,6 +29,9 @@
 #define DIRECCION_ARRIBA 2
 #define DIRECCION_ABAJO 3
 
+const int pinX = 0,
+          pinY = 1;
+
 
 LiquidCrystal_I2C pantalla(DIRECCION_LCD, ANCHURA_LCD, ALTURA_LCD);
 int prueba[ALTURA_TABLERO][ANCHURA_TABLERO] = {
@@ -68,6 +71,24 @@ class PedazoSerpiente {
 PedazoSerpiente serpiente[MAXIMA_LONGITUD_SERPIENTE];
 int longitudSerpiente = 0;
 int direccion = DIRECCION_DERECHA;
+
+int obtenerDireccion() {
+
+  int valorX = analogRead(pinX),
+      valorY = analogRead(pinY);
+  if (valorX > 900) {
+    return DIRECCION_IZQUIERDA;
+  } else if (valorX < 400) {
+    return DIRECCION_DERECHA;
+  }
+
+  if (valorY > 900) {
+    return DIRECCION_ARRIBA;
+  } else if (valorY < 400) {
+    return DIRECCION_ABAJO;
+  }
+  return -1;
+}
 
 void cambiarDireccion(int nuevaDireccion) {
   if (
@@ -133,7 +154,14 @@ void colocarSerpienteEnMatriz() {
 }
 
 void setup() {
-  randomSeed(analogRead(0));
+  pinMode(2, INPUT_PULLUP);
+  pinMode(3, INPUT_PULLUP);
+  pinMode(4, INPUT_PULLUP);
+  pinMode(13, OUTPUT);
+  Serial.begin(9600);
+
+
+  //randomSeed(analogRead(0));
   pantalla.init();
   pantalla.backlight();
   for (int i = 0; i < 20; i++) {
@@ -194,14 +222,12 @@ void limpiarMatriz() {
 }
 
 void loop() {
-  //pantalla.noBlink();
   limpiarMatriz();
-  cambiarDireccion(random(0, 15));
+  cambiarDireccion(obtenerDireccion());
   moverSerpiente();
   colocarSerpienteEnMatriz();
   dibujarMatriz();
   dibujarPuntaje();
-  //  pantalla.blink();
-  delay(50);
+  delay(100);
 
 }
